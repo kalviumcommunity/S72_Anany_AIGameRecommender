@@ -46,6 +46,26 @@ app.post("/add-game", (req, res) => {
   });
 });
 
+// PUT API - Update a game's details
+app.put("/update-game/:name", (req, res) => {
+    const gameName = req.params.name;
+    const { genre } = req.body;
+
+    // Find the game
+    const gameIndex = games.findIndex(g => g.name.toLowerCase() === gameName.toLowerCase());
+
+    if (gameIndex === -1) {
+        return res.status(404).json({ error: "Game not found" });
+    }
+
+    // Update genre if provided
+    if (genre) {
+        games[gameIndex].genre = genre;
+    }
+
+    res.json({ message: "Game updated successfully", game: games[gameIndex] });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
