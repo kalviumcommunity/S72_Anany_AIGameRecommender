@@ -1,11 +1,13 @@
-# 🎮 AI Game Recommender & Lore Generator  
+# 🎮 AI Game Recommender & Lore Generator
 
-**Brief:** AI-powered game recommendation system that retrieves similar games using embeddings, RAG, and generates immersive lore expansions with structured outputs and function calling.  
+**Brief:** AI-powered game recommendation system that retrieves similar games using embeddings, RAG, and generates immersive lore expansions with structured outputs and function calling.
 
 ---
 
 ## 🚀 Project Overview
+
 This project is a **fun AI assistant for gamers** that:
+
 - Recommends similar games based on player preferences.
 - Uses **Retrieval-Augmented Generation (RAG)** to search a small dataset of games.
 - Generates **new story lore** for games dynamically.
@@ -18,6 +20,7 @@ This project is a **fun AI assistant for gamers** that:
 ---
 
 ## 🛠️ Tech Stack
+
 - **LLM Backend:** [Ollama](https://ollama.ai) (for chat + embeddings)
 - **Vector Database:** FAISS / Chroma
 - **Language:** Python 3.10+
@@ -27,6 +30,7 @@ This project is a **fun AI assistant for gamers** that:
 ---
 
 ## ⚙️ Features Implemented
+
 - **Embeddings:** Generate and store embeddings for games dataset.
 - **Similarity Search:** Cosine, Dot Product, Euclidean distance.
 - **RAG:** Retrieve top relevant games from dataset before response.
@@ -41,14 +45,16 @@ This project is a **fun AI assistant for gamers** that:
 ---
 
 ## 🧪 Example Flow
-1. User asks: *“Recommend me dark fantasy RPGs with deep story.”*
+
+1. User asks: _“Recommend me dark fantasy RPGs with deep story.”_
 2. Query is embedded → compared to stored game embeddings.
-3. Top matches (e.g., *The Witcher 3, Dark Souls*) retrieved.
+3. Top matches (e.g., _The Witcher 3, Dark Souls_) retrieved
 4. LLM generates structured JSON:
    ```json
    {
      "recommendations": [
-       {"title": "The Witcher 3", "reason": "Dark fantasy with rich story"},
-       {"title": "Dark Souls", "reason": "Challenging, lore-heavy atmosphere"}
+       { "title": "The Witcher 3", "reason": "Dark fantasy with rich story" },
+       { "title": "Dark Souls", "reason": "Challenging, lore-heavy atmosphere" }
      ]
    }
+   ```
