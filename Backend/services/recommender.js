@@ -4,6 +4,7 @@ const stripToJson = require("../utils/stripToJson");
 const { buildPrompt } = require("./promptBuilder");
 const games = require("../data/games");
 const { embedText, embedTexts } = require("./embeddings");
+const { fetchGamesFromRAWG } = require("./externalGames");
 
 const llm = new ChatGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -13,25 +14,73 @@ const llm = new ChatGoogleGenerativeAI({
 async function llmRecommend(userQuery, limit = 3) {
   const prompt = buildPrompt(userQuery, limit);
 
-  const response = await llm.invoke([
+  // Lightweight function-calling: model may request a tool, we execute once, then get final JSON
+  const toolInstructions = `\n\nTOOLS AVAILABLE (use only if needed):\n- search_local_games({ genre?: string, search?: string, limit?: number }): Search the local dataset for games.\n- fetch_external_games({ genre?: string, search?: string, limit?: number }): Fetch popular games from RAWG API (needs env RAWG_API_KEY).\n\nIf a tool is needed, reply ONLY with this JSON (no prose):\n{\n  "tool_call": { "name": "search_local_games" | "fetch_external_games", "arguments": { /* args */ } }\n}\nOtherwise, directly return the final JSON per the required schema.`;
+
+  const initialResponse = await llm.invoke([
     {
       role: "system",
-      content: `
-You are a strict JSON API. 
-Always respond ONLY with valid JSON following the given schema:
-{
-  "reasoning": "string",
-  "recommendations": [ { "name": "string", "genre": "string", "description": "string" } ]
-}
-Never output text, markdown, or explanations outside JSON.`
+      content: `You are a strict JSON API. Always respond ONLY with valid JSON. ${toolInstructions}`
     },
     { role: "user", content: prompt }
   ]);
 
-  const raw = response?.content?.[0]?.text || "";
-  console.log("🟡 RAW AI OUTPUT:", raw);
+  let raw = initialResponse?.content?.[0]?.text || "";
+  console.log("🟡 RAW AI OUTPUT (initial):", raw);
 
-  let cleaned = stripToJson(raw);
+  // Try to detect a tool call
+  let toolCall;
+  try {
+    const maybe = JSON.parse(stripToJson(raw));
+    if (maybe && maybe.tool_call && maybe.tool_call.name) {
+      toolCall = maybe.tool_call;
+    }
+  } catch (_) {}
+
+  let modelFinalRaw = raw;
+
+  if (toolCall) {
+    const name = String(toolCall.name || "");
+    const args = (toolCall.arguments && typeof toolCall.arguments === "object") ? toolCall.arguments : {};
+    const safeLimit = Math.max(1, Math.min(parseInt(args.limit) || limit, 10));
+
+    let toolResult = [];
+    if (name === "search_local_games") {
+      const genre = (args.genre || "").toString().toLowerCase();
+      const search = (args.search || "").toString().toLowerCase();
+      const pool = games.filter((g) => {
+        const genreOk = genre ? (g.genre || "").toLowerCase() === genre : true;
+        const searchOk = search ? (
+          (g.name || "").toLowerCase().includes(search) ||
+          (g.description || "").toLowerCase().includes(search)
+        ) : true;
+        return genreOk && searchOk;
+      });
+      toolResult = pool.slice(0, safeLimit).map((g) => ({ name: g.name, genre: g.genre, description: g.description }));
+    } else if (name === "fetch_external_games") {
+      const genre = args.genre ? String(args.genre) : undefined;
+      const search = args.search ? String(args.search) : undefined;
+      toolResult = await fetchGamesFromRAWG({ genre, search, limit: safeLimit });
+    }
+
+    // Ask the model to produce the final JSON using tool result
+    const followup = await llm.invoke([
+      {
+        role: "system",
+        content: `You are a strict JSON API. Return ONLY final JSON per schema with exactly ${safeLimit} items.`
+      },
+      { role: "user", content: prompt },
+      {
+        role: "user",
+        content: `Tool '${name}' returned this array (JSON):\n${JSON.stringify(toolResult)}\nUse it (optionally combined with your knowledge) to produce the final JSON.`
+      }
+    ]);
+
+    modelFinalRaw = followup?.content?.[0]?.text || "";
+    console.log("🟡 RAW AI OUTPUT (final):", modelFinalRaw);
+  }
+
+  let cleaned = stripToJson(modelFinalRaw);
   let parsed;
 
   try {
