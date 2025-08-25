@@ -20,7 +20,38 @@ async function llmRecommend(userQuery, limit = 3) {
   const initialResponse = await llm.invoke([
     {
       role: "system",
-      content: `You are a strict JSON API. Always respond ONLY with valid JSON. ${toolInstructions}`
+      content: `You are a strict JSON API. Always respond ONLY with valid JSON following this exact schema:
+
+{
+  "reasoning": "short reasoning why these games fit",
+  "recommendations": [
+    { "name": "string", "genre": "string", "description": "string" }
+  ]
+}
+
+Example responses:
+
+User: "I want a fun RPG on PC"
+Response: {
+  "reasoning": "Based on your request for a fun PC RPG, here are engaging role-playing games with rich storytelling and character development.",
+  "recommendations": [
+    { "name": "The Witcher 3: Wild Hunt", "genre": "rpg", "description": "Epic open-world RPG with compelling story and monster hunting." },
+    { "name": "Persona 5 Royal", "genre": "rpg", "description": "Stylized JRPG about high schoolers with supernatural powers." },
+    { "name": "Dragon Age: Inquisition", "genre": "rpg", "description": "Fantasy RPG with party-based combat and moral choices." }
+  ]
+}
+
+User: "I like strategy games with historical themes"
+Response: {
+  "reasoning": "Historical strategy games offer deep tactical gameplay with real-world historical contexts and empire building.",
+  "recommendations": [
+    { "name": "Civilization VI", "genre": "strategy", "description": "Turn-based strategy about building civilizations from ancient to modern times." },
+    { "name": "Age of Empires II", "genre": "strategy", "description": "Real-time strategy featuring medieval warfare and castle building." },
+    { "name": "Total War: Warhammer II", "genre": "strategy", "description": "Grand strategy with real-time battles in fantasy setting." }
+  ]
+}
+
+${toolInstructions}`
     },
     { role: "user", content: prompt }
   ]);
@@ -67,7 +98,22 @@ async function llmRecommend(userQuery, limit = 3) {
     const followup = await llm.invoke([
       {
         role: "system",
-        content: `You are a strict JSON API. Return ONLY final JSON per schema with exactly ${safeLimit} items.`
+        content: `You are a strict JSON API. Return ONLY final JSON per this exact schema with exactly ${safeLimit} items:
+
+{
+  "reasoning": "short reasoning why these games fit",
+  "recommendations": [
+    { "name": "string", "genre": "string", "description": "string" }
+  ]
+}
+
+Example format:
+{
+  "reasoning": "Based on the tool results and your preferences, here are the best matching games.",
+  "recommendations": [
+    { "name": "Game Name", "genre": "genre", "description": "Brief description of the game." }
+  ]
+}`
       },
       { role: "user", content: prompt },
       {
