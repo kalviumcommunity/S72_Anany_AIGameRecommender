@@ -3,7 +3,7 @@ const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const stripToJson = require("../utils/stripToJson");
 const { buildPrompt } = require("./promptBuilder");
 const games = require("../data/games");
-const { embedText, embedTexts } = require("./embeddings");
+const { embedText, embedTexts, cosineSimilarity } = require("./embeddings");
 const { fetchGamesFromRAWG } = require("./externalGames");
 
 const llm = new ChatGoogleGenerativeAI({
@@ -123,10 +123,24 @@ async function llmRecommend(userQuery, limit = 3) {
     recommendations = [...recommendations, ...topUp].slice(0, limit);
   }
 
-  // Embeddings (optional)
+  // Embeddings (optional) and ranking by cosine similarity
   const userEmbedding = await embedText(userQuery);
   const itemEmbeddings = await embedTexts(recommendations.map((r) => `${r.name} - ${r.genre}: ${r.description}`));
 
+  // Score and sort if embeddings are available
+  let scored = recommendations.map((r, i) => {
+    const itemEmb = itemEmbeddings[i];
+    const score = userEmbedding && itemEmb ? cosineSimilarity(userEmbedding, itemEmb) : null;
+    return { rec: r, score };
+  });
+  // Prefer higher scores; keep original order for null scores
+  scored.sort((a, b) => {
+    if (a.score == null && b.score == null) return 0;
+    if (a.score == null) return 1;
+    if (b.score == null) return -1;
+    return b.score - a.score;
+  });
+  recommendations = scored.map((s) => s.rec).slice(0, limit);
   return {
     reasoning: parsed.reasoning || (recommendations.length ? "Based on your query and available data." : "No results for this query."),
     embeddings: {

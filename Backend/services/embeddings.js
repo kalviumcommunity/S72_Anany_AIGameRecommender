@@ -37,6 +37,25 @@ async function embedTexts(texts) {
   }
 }
 
-module.exports = { embedText, embedTexts };
+function cosineSimilarity(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return null;
+  const len = Math.min(a.length, b.length);
+  if (len === 0) return null;
+  let dot = 0;
+  let aSq = 0;
+  let bSq = 0;
+  for (let i = 0; i < len; i++) {
+    const av = Number(a[i]) || 0;
+    const bv = Number(b[i]) || 0;
+    dot += av * bv;
+    aSq += av * av;
+    bSq += bv * bv;
+  }
+  const denom = Math.sqrt(aSq) * Math.sqrt(bSq);
+  if (!isFinite(denom) || denom === 0) return null;
+  return dot / denom;
+}
+
+module.exports = { embedText, embedTexts, cosineSimilarity };
 
 
