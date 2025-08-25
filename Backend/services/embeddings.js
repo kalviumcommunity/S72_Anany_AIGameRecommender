@@ -56,6 +56,19 @@ function cosineSimilarity(a, b) {
   return dot / denom;
 }
 
-module.exports = { embedText, embedTexts, cosineSimilarity };
+function dotProductSimilarity(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b)) return null;
+  const len = Math.min(a.length, b.length);
+  if (len === 0) return null;
+  let dot = 0;
+  for (let i = 0; i < len; i++) {
+    const av = Number(a[i]) || 0;
+    const bv = Number(b[i]) || 0;
+    dot += av * bv;
+  }
+  return dot;
+}
+
+module.exports = { embedText, embedTexts, cosineSimilarity, dotProductSimilarity };
 
 
