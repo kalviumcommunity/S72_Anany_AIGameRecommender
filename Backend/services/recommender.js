@@ -3,6 +3,7 @@ const { ChatGoogleGenerativeAI } = require("@langchain/google-genai");
 const stripToJson = require("../utils/stripToJson");
 const { buildPrompt } = require("./promptBuilder");
 const games = require("../data/games");
+const { embedText, embedTexts } = require("./embeddings");
 
 const llm = new ChatGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -73,8 +74,16 @@ Never output text, markdown, or explanations outside JSON.`
     recommendations = [...recommendations, ...topUp].slice(0, limit);
   }
 
+  // Embeddings (optional)
+  const userEmbedding = await embedText(userQuery);
+  const itemEmbeddings = await embedTexts(recommendations.map((r) => `${r.name} - ${r.genre}: ${r.description}`));
+
   return {
     reasoning: parsed.reasoning || (recommendations.length ? "Based on your query and available data." : "No results for this query."),
+    embeddings: {
+      user: userEmbedding,
+      items: itemEmbeddings,
+    },
     recommendations,
   };
 }
