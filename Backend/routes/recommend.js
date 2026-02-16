@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const { llmRecommend } = require("../services/recommender");
 
-// GET /recommend?query=I+like+RPG&limit=3
+// GET /api/recommend?query=I+like+RPG&limit=3
 router.get("/", async (req, res) => {
   try {
     const query = (req.query.query || "").trim();
@@ -15,10 +15,10 @@ router.get("/", async (req, res) => {
 
     const { reasoning, recommendations } = await llmRecommend(query, limit);
 
-    res.json({ reasoning, recommendations });
+    res.json({ success: true, reasoning, recommendations });
   } catch (err) {
-    console.error("GET /recommend error:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("GET /api/recommend error:", err);
+    res.status(500).json({ error: err.message || "Internal server error" });
   }
 });
 

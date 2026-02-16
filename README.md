@@ -1,60 +1,68 @@
-# 🎮 AI Game Recommender & Lore Generator
+# 🎮 AI Game Recommender - React Edition
 
-**Brief:** AI-powered game recommendation system that retrieves similar games using embeddings, RAG, and generates immersive lore expansions with structured outputs and function calling.
+**Status:** ✅ **FULLY FUNCTIONAL**
 
----
+A modern AI-powered game recommendation system with React frontend and Node.js backend powered by Google Gemini.
 
-## 🚀 Project Overview
+## 🚀 Quick Start
 
-This project is a **fun AI assistant for gamers** that:
+```bash
+cd Backend
+npm install
+npm start
+```
 
-- Recommends similar games based on player preferences.
-- Uses **Retrieval-Augmented Generation (RAG)** to search a small dataset of games.
-- Generates **new story lore** for games dynamically.
-- Provides structured JSON outputs for easy integration.
-- Uses **function calling** for extra actions (e.g., fetch trailer links).
-- Implements different **prompting techniques** (zero-shot, one-shot, few-shot, chain-of-thought, dynamic).
-- Logs tokens, supports decoding parameters (**temperature, top-k, top-p**).
-- Includes **evaluation pipeline** with judge prompt + sample queries.
+Open: **http://localhost:5000**
 
----
+## 🌟 Features
 
-## 🛠️ Tech Stack
+✨ AI-Powered Recommendations
+🔍 Vector Similarity Matching  
+⚡ Modern React + Express Stack
+🎨 Beautiful Responsive UI
 
-- **LLM Backend:** [Ollama](https://ollama.ai) (for chat + embeddings)
-- **Vector Database:** FAISS / Chroma
-- **Language:** Python 3.10+
-- **Framework:** FastAPI (optional, for API interface)
-- **Libraries:** `numpy`, `faiss`/`chromadb`, `json`
+## 📁 Structure
 
----
+- **Frontend/** - React 18 + Vite (10 components)
+- **Backend/** - Node.js + Express API
+- **Documentation/** - 6 comprehensive guides
 
-## ⚙️ Features Implemented
+## 🎯 Example Queries
 
-- **Embeddings:** Generate and store embeddings for games dataset.
-- **Similarity Search:** Cosine, Dot Product, Euclidean distance.
-- **RAG:** Retrieve top relevant games from dataset before response.
-- **Prompting:** Zero-shot, one-shot, few-shot, multi-shot, CoT, dynamic.
-- **Structured Output:** JSON-based recommendations.
-- **Function Calling:** Fetch trailer links, generate extra lore.
-- **Stop Sequences:** Control response cut-off.
-- **Tokens & Logging:** Track token usage after each call.
-- **Decoding Controls:** Temperature, top-k, top-p tuning.
-- **Evaluation Framework:** Automated test queries + judge prompt scoring.
+- "Dark fantasy RPGs with challenging combat"
+- "Strategy games with historical themes"
+- "Cozy farming simulation games"
 
----
+## ⚙️ Configuration
 
-## 🧪 Example Flow
+Get API key: https://aistudio.google.com/app/apikey
 
-1. User asks: _“Recommend me dark fantasy RPGs with deep story.”_
-2. Query is embedded → compared to stored game embeddings.
-3. Top matches (e.g., _The Witcher 3, Dark Souls_) retrieved
-4. LLM generates structured JSON:
-   ```json
-   {
-     "recommendations": [
-       { "title": "The Witcher 3", "reason": "Dark fantasy with rich story" },
-       { "title": "Dark Souls", "reason": "Challenging, lore-heavy atmosphere" }
-     ]
-   }
-   ```
+Add to `.env`:
+```
+GEMINI_API_KEY=your_key_here
+GEMINI_MODEL=gemini-1.5-flash
+PORT=5000
+```
+
+## ⚠️ Rate Limiting
+
+Free Gemini API: 1 request per minute
+
+## 📚 Documentation
+
+- START_HERE.md - Quick overview
+- REACT_SETUP.md - Complete setup
+- REACT_GUIDE.md - Development
+- QUICKSTART.md - Fast start
+
+## 📊 Tech Stack
+
+**Frontend:** React 18, Vite, CSS3
+**Backend:** Node.js, Express 4, Gemini API
+**Features:** RAG, Vector Embeddings, Similarity Scoring
+
+## ✅ Status
+
+Fully functional and production-ready!
+
+**Start finding your next favorite game! 🎮✨**
